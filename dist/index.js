@@ -3818,7 +3818,7 @@ const github_1 = __webpack_require__(469);
 const markdown_table_1 = __importDefault(__webpack_require__(366));
 const Term_1 = __importDefault(__webpack_require__(733));
 const SizeLimit_1 = __importDefault(__webpack_require__(617));
-const SIZE_LIMIT_HEADING = `## size-limit report 📦 `;
+const SIZE_LIMIT_HEADING = `## 📦 Size Report`;
 function fetchPreviousComment(octokit, repo, pr) {
     return __awaiter(this, void 0, void 0, function* () {
         // TODO: replace with octokit.issues.listComments when upgraded to v17
@@ -10629,7 +10629,7 @@ class SizeLimit {
         }
         return `${Math.ceil(seconds * 1000)} ms`;
     }
-    formatChange(base = 0, current = 0) {
+    formatRelativeChange(base = 0, current = 0) {
         if (base === 0) {
             return "+100% 🔺";
         }
@@ -10646,18 +10646,26 @@ class SizeLimit {
     formatLine(value, change) {
         return `${value} (${change})`;
     }
+    formatAbsoluteChange(base = 0, current = 0) {
+        if (base === 0) {
+            return this.formatBytes(current);
+        }
+        const value = current - base;
+        return this.formatBytes(value);
+    }
     formatSizeResult(name, base, current) {
         return [
             name,
-            this.formatLine(this.formatBytes(current.size), this.formatChange(base.size, current.size))
+            this.formatBytes(current.size),
+            `${this.formatAbsoluteChange(base.size, current.size)} (${this.formatRelativeChange(base.size, current.size)})`
         ];
     }
     formatTimeResult(name, base, current) {
         return [
             name,
-            this.formatLine(this.formatBytes(current.size), this.formatChange(base.size, current.size)),
-            this.formatLine(this.formatTime(current.loading), this.formatChange(base.loading, current.loading)),
-            this.formatLine(this.formatTime(current.running), this.formatChange(base.running, current.running)),
+            this.formatLine(this.formatBytes(current.size), this.formatRelativeChange(base.size, current.size)),
+            this.formatLine(this.formatTime(current.loading), this.formatRelativeChange(base.loading, current.loading)),
+            this.formatLine(this.formatTime(current.running), this.formatRelativeChange(base.running, current.running)),
             this.formatTime(current.total)
         ];
     }
@@ -10694,7 +10702,7 @@ class SizeLimit {
         return [header, ...fields];
     }
 }
-SizeLimit.SIZE_RESULTS_HEADER = ["Path", "Size"];
+SizeLimit.SIZE_RESULTS_HEADER = ["Path", "Size", "Diff"];
 SizeLimit.TIME_RESULTS_HEADER = [
     "Path",
     "Size",

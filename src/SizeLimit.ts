@@ -18,7 +18,7 @@ const EmptyResult = {
 };
 
 class SizeLimit {
-  static SIZE_RESULTS_HEADER = ["Path", "Size"];
+  static SIZE_RESULTS_HEADER = ["Path", "Size", "Diff"];
 
   static TIME_RESULTS_HEADER = [
     "Path",
@@ -40,7 +40,7 @@ class SizeLimit {
     return `${Math.ceil(seconds * 1000)} ms`;
   }
 
-  private formatChange(base: number = 0, current: number = 0): string {
+  private formatRelativeChange(base: number = 0, current: number = 0): string {
     if (base === 0) {
       return "+100% 🔺";
     }
@@ -64,6 +64,15 @@ class SizeLimit {
     return `${value} (${change})`;
   }
 
+  private formatAbsoluteChange(base: number = 0, current: number = 0): string {
+    if (base === 0) {
+      return this.formatBytes(current);
+    }
+
+    const value = current - base;
+    return this.formatBytes(value);
+  }
+
   private formatSizeResult(
     name: string,
     base: IResult,
@@ -71,10 +80,11 @@ class SizeLimit {
   ): Array<string> {
     return [
       name,
-      this.formatLine(
-        this.formatBytes(current.size),
-        this.formatChange(base.size, current.size)
-      )
+      this.formatBytes(current.size),
+      `${this.formatAbsoluteChange(
+        base.size,
+        current.size
+      )} (${this.formatRelativeChange(base.size, current.size)})`
     ];
   }
 
@@ -87,15 +97,15 @@ class SizeLimit {
       name,
       this.formatLine(
         this.formatBytes(current.size),
-        this.formatChange(base.size, current.size)
+        this.formatRelativeChange(base.size, current.size)
       ),
       this.formatLine(
         this.formatTime(current.loading),
-        this.formatChange(base.loading, current.loading)
+        this.formatRelativeChange(base.loading, current.loading)
       ),
       this.formatLine(
         this.formatTime(current.running),
-        this.formatChange(base.running, current.running)
+        this.formatRelativeChange(base.running, current.running)
       ),
       this.formatTime(current.total)
     ];
